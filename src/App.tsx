@@ -165,11 +165,11 @@ function App() {
 		<div className="w-screen min-h-screen bg-orange-200 p-4">
 			{/* ^ min-h-screen ensures bg color covers the entire page, even when content overflows */}
 			<Toaster position="top-center" closeButton />
-			<p className="text-xl font-bold mb-2">
+			<p className="font-bold">
 				Try sorting the pokemon by their heights, then submit your
 				guess!
 			</p>
-			<p className="text-xl font-bold mb-4">
+			<p className="font-bold mb-2">
 				Once submitted, you can toggle between the correct answer and
 				your attempt.
 			</p>
@@ -180,12 +180,12 @@ function App() {
 							{/* Without inline-block, Tooltip shows up on the left */}
 							<Label
 								htmlFor="numOfPokemon"
-								className="mb-2 mr-3 inline-block text-xl"
+								className="mb-1 mr-3 inline-block text-base"
 							>
 								Number of pokemon:
 							</Label>
 							<Input
-								className="bg-white w-20 inline-block mb-2"
+								className="bg-white w-20 inline-block mb-1"
 								onChange={(e) =>
 									setNumOfPokemon(Number(e.target.value))
 								}
@@ -198,27 +198,25 @@ function App() {
 						</div>
 					</TooltipTrigger>
 					<TooltipContent side="right">
-						<p className="text-base">Number between 2 and 20</p>
+						<p>Number between 2 and 20</p>
 					</TooltipContent>
 				</Tooltip>
 				<Button
 					onClick={handleNewGameButtonClick}
-					className="mb-2 cursor-pointer block text-lg"
-					size="lg"
+					className="mb-1 cursor-pointer block"
 				>
 					New game
 				</Button>
 			</form>
 			{loading ? (
-				<p className="text-lg">Loading...</p>
+				<p>Loading...</p>
 			) : error ? (
-				<p className="text-lg">Error : {error.message}</p>
+				<p>Error : {error.message}</p>
 			) : (
 				<>
 					<Button
 						onClick={handleSortClick}
-						className="cursor-pointer block mb-4 text-lg"
-						size="lg"
+						className="cursor-pointer block mb-1"
 					>
 						{!isGuessSubmitted
 							? "Submit guess"
@@ -226,9 +224,21 @@ function App() {
 							? "Show sorted position"
 							: "Show original position"}
 					</Button>
-					{scoreForGuess === 100 ? <Confetti /> : null}
+					{scoreForGuess === 100 ? (
+						<div
+							style={{
+								position: "absolute",
+								overflow: "hidden",
+								width: "90%",
+								height: "50vh",
+							}}
+						>
+							{/* Styled to remove vertical and horizontal scrollbars for typical viewports */}
+							<Confetti />
+						</div>
+					) : null}
 					<p
-						className={`text-xl mb-4 ${
+						className={`text-xl mb-2 ${
 							isGuessSubmitted ? "visible" : "invisible"
 						}`}
 						style={{

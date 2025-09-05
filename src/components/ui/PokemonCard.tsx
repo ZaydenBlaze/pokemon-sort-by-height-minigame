@@ -38,7 +38,7 @@ export function PokemonCard({
 				ref(el);
 				refProp(el);
 			}}
-			className="w-40 bg-white p-4 rounded-3xl shadow-md cursor-pointer flex flex-col"
+			className="w-36 bg-white p-4 text-sm rounded-3xl shadow-md cursor-pointer flex flex-col"
 			style={{
 				transform: to(
 					[spring.x, spring.y],
@@ -51,7 +51,7 @@ export function PokemonCard({
 		>
 			{pokemonData ? (
 				<>
-					<p className="font-bold text-lg">
+					<p className="text-base font-bold">
 						{capFirstLetter(pokemonData.name)}
 					</p>
 					<p>Id: {id}</p>
@@ -61,7 +61,7 @@ export function PokemonCard({
 						{/* That remaining space will exist if a pokemon on that row has a name long enough to wrap to the 2nd line. */}
 						<img
 							src={`https://assets.pokemon.com/assets/cms2/img/pokedex/full/${paddedId}.png`}
-							width={148}
+							width={120}
 						/>
 					</div>
 					<div className="mt-auto">
