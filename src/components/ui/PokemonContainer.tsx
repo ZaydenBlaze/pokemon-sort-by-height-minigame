@@ -2,13 +2,7 @@ import { PokemonCard } from "@/components/ui/PokemonCard";
 import { type SpringValues } from "@react-spring/web";
 import { DragDropProvider } from "@dnd-kit/react";
 import { isSortable } from "@dnd-kit/react/sortable";
-type TPokemon = {
-	__typename: "pokemon_v2_pokemon";
-	id: number;
-	name: string;
-	height: number;
-	weight: number;
-};
+import { type TPokemon } from "@/types/TPokemon";
 
 type PokemonContainerProps = {
 	containerRef: React.RefObject<HTMLUListElement | null>;

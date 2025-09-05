@@ -11,21 +11,16 @@ import {
 import { Toaster, toast } from "sonner";
 import { useSprings } from "@react-spring/web";
 import { Confetti } from "@neoconfetti/react";
-import { PokemonContainer } from "./components/ui/PokemonContainer";
+import { PokemonContainer } from "@/components/ui/PokemonContainer";
 import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 import {
 	generatePokemonQuery,
 	generateDummyPokemonQuery,
 } from "@/utils/pokemonQueries";
-
-type TPokemon = {
-	__typename: "pokemon_v2_pokemon";
-	id: number;
-	name: string;
-	height: number;
-	weight: number;
-};
+import { generateRandomPokemonIds } from "@/utils/generateRandomPokemonIds";
+import { countInversionsPercentage } from "@/utils/countInversionsPercentage";
+import { type TPokemon } from "@/types/TPokemon";
 
 function App() {
 	const [numOfPokemon, setNumOfPokemon] = useState(10);
@@ -272,36 +267,3 @@ function App() {
 }
 
 export default App;
-
-function generateRandomPokemonIds(numPokemon: number) {
-	const ids: number[] = [];
-	const maxId = 1025;
-	while (ids.length < numPokemon) {
-		const randomId = Math.floor(Math.random() * maxId) + 1;
-		if (!ids.includes(randomId)) {
-			ids.push(randomId);
-		}
-	}
-	return ids;
-}
-
-// Kendall's tau distance
-function countInversionsPercentage(
-	arr: TPokemon[],
-	key: (x: TPokemon) => number
-) {
-	const n = arr.length;
-	if (n < 2) return 100; // perfectly sorted by default
-
-	let inversions = 0;
-	for (let i = 0; i < n; i++) {
-		for (let j = i + 1; j < n; j++) {
-			if (key(arr[i]) > key(arr[j])) inversions++;
-		}
-	}
-
-	const maxInversions = (n * (n - 1)) / 2;
-	const normalized = inversions / maxInversions;
-
-	return (1 - normalized) * 100; // 100% = perfect, 0% = worst
-}
