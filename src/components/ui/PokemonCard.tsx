@@ -16,7 +16,7 @@ type SortablePokemonProps = {
 	refProp: (el: HTMLLIElement | null) => void;
 	spring: { x: SpringValue<number>; y: SpringValue<number> };
 	isGuessSubmitted: boolean;
-	pokemonData: TPokemon[];
+	pokemonData: TPokemon | null;
 };
 
 export function PokemonCard({
@@ -24,7 +24,7 @@ export function PokemonCard({
 	index,
 	refProp,
 	spring,
-	isGuessSubmitted, // to know whether guess has been submitted so we know to conditionally render height and weight
+	isGuessSubmitted,
 	pokemonData,
 }: SortablePokemonProps) {
 	const { ref, isDragging } = useSortable({
@@ -34,6 +34,10 @@ export function PokemonCard({
 	});
 
 	const paddedId = String(id).padStart(3, "0");
+
+	function capFirstLetter(name: string) {
+		return name.charAt(0).toUpperCase() + name.slice(1);
+	}
 
 	return (
 		<animated.li
@@ -60,8 +64,8 @@ export function PokemonCard({
 					<p>Id: {id}</p>
 
 					<div className="flex grow items-center justify-center">
-						{/* "grow" class means element grows to take up any remaining space in the flex container, */}
-						{/* which will exist if a pokemon on that row has a name long enough to wrap to the 2nd line. */}
+						{/* "grow" class means element grows to take up any remaining space in the flex container. */}
+						{/* That remaining space will exist if a pokemon on that row has a name long enough to wrap to the 2nd line. */}
 						<img
 							src={`https://assets.pokemon.com/assets/cms2/img/pokedex/full/${paddedId}.png`}
 							width={148}
@@ -85,8 +89,4 @@ export function PokemonCard({
 			)}
 		</animated.li>
 	);
-}
-
-function capFirstLetter(name: string) {
-	return name.charAt(0).toUpperCase() + name.slice(1);
 }

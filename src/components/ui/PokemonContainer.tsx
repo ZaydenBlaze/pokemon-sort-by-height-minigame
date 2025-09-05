@@ -17,7 +17,7 @@ type PokemonContainerProps = {
 	setPokemonIds: React.Dispatch<React.SetStateAction<number[]>>;
 	springs: SpringValues<{ x: number; y: number }>[];
 	isGuessSubmitted: boolean;
-	pokemonsData: TPokemon[];
+	pokemonsData: TPokemon[] | null;
 };
 
 export const PokemonContainer = ({
@@ -29,6 +29,7 @@ export const PokemonContainer = ({
 	isGuessSubmitted,
 	pokemonsData,
 }: PokemonContainerProps) => {
+	if (!pokemonsData) return;
 	return (
 		<ul ref={containerRef} className="flex flex-wrap gap-3">
 			<DragDropProvider
@@ -41,8 +42,8 @@ export const PokemonContainer = ({
 						source.sortable;
 					setPokemonIds((prevIds) => {
 						const updatedIds = [...prevIds];
-						const [movedItem] = updatedIds.splice(oldIndex, 1); // remove the dragged item
-						updatedIds.splice(newIndex, 0, movedItem); // insert it at the new index
+						const [movedItem] = updatedIds.splice(oldIndex, 1); // Remove the dragged item
+						updatedIds.splice(newIndex, 0, movedItem); // Insert it at the new index
 						return updatedIds;
 					});
 				}}

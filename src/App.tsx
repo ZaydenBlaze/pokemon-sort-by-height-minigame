@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef } from "react";
 import "./App.css";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -44,7 +44,7 @@ function App() {
 	const containerRef = useRef<HTMLUListElement | null>(null);
 	const boxRefs = useRef<Record<number, HTMLLIElement | null>>({});
 
-	// React Spring springs for FLIP animation technique
+	// React Spring springs to animate <PokemonCard/>s to their sorted and submitted positions
 	const [springs, api] = useSprings(pokemonIds.length, () => ({
 		x: 0,
 		y: 0,
@@ -62,7 +62,9 @@ function App() {
 
 	const { loading, error, data } = useQuery(GET_POKEMON);
 
-	const pokemonsData = data ? Object.values(data).flat() : null;
+	const pokemonsData: TPokemon[] | null = data
+		? Object.values(data).flat()
+		: null;
 
 	function handleSortClick() {
 		if (!containerRef.current) return;
@@ -72,7 +74,7 @@ function App() {
 			setIsGuessSubmitted(true);
 			submittedIds.current = pokemonIds;
 
-			// Count inversions to quantify disorder
+			// Count inversions to quantify disorder and get score for submitted guess
 			if (!pokemonsData) return;
 			const scorePercent = countInversionsPercentage(
 				pokemonsData,
@@ -84,7 +86,7 @@ function App() {
 				.map((pokemon) => pokemon.id);
 
 			if (scorePercent === 100) {
-				// fully sorted; no need for animation
+				// Fully sorted; no need for animation
 				return;
 			}
 		}
@@ -108,7 +110,7 @@ function App() {
 		// Last: update order
 		const newOrder =
 			animationDirection === "toSorted"
-				? sortedIds.current ?? [] // if ternary chooses sortedIds.current, and sortedIds.current is null, then choose []
+				? sortedIds.current ?? [] // If ternary chooses sortedIds.current, and sortedIds.current is null, then choose []
 				: submittedIds.current ?? [];
 		setPokemonIds(newOrder);
 
@@ -146,7 +148,9 @@ function App() {
 		});
 	}
 
-	function handleNewGameButtonClick(e) {
+	function handleNewGameButtonClick(
+		e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+	) {
 		e.preventDefault();
 		if (!numOfPokemon || numOfPokemon < 2 || numOfPokemon > 20) {
 			toast.warning("Must be a number between 2 and 20", {
@@ -164,7 +168,7 @@ function App() {
 
 	return (
 		<div className="w-screen min-h-screen bg-orange-200 p-4">
-			{/* ^min-h-screen ensures bg color covers the entire page, even when content overflows */}
+			{/* ^ min-h-screen ensures bg color covers the entire page, even when content overflows */}
 			<Toaster position="top-center" closeButton />
 			<p className="text-xl font-bold mb-2">
 				Try sorting the pokemon by their heights, then submit your
@@ -188,7 +192,7 @@ function App() {
 							<Input
 								className="bg-white w-20 inline-block mb-2"
 								onChange={(e) =>
-									setNumOfPokemon(e.target.value)
+									setNumOfPokemon(Number(e.target.value))
 								}
 								value={numOfPokemon}
 								id="numOfPokemon"
@@ -239,7 +243,7 @@ function App() {
 							WebkitBackgroundClip: "text",
 							WebkitTextFillColor: "transparent",
 							animation: "rainbow 3s linear infinite",
-							WebkitTextStroke: "1px black", // adds solid black outline
+							WebkitTextStroke: "1px black",
 						}}
 					>
 						{`You got a score of ${scoreForGuess?.toFixed(1)}%!`}
@@ -282,7 +286,10 @@ function generateRandomPokemonIds(numPokemon: number) {
 }
 
 // Kendall's tau distance
-function countInversionsPercentage(arr, key = (x) => x) {
+function countInversionsPercentage(
+	arr: TPokemon[],
+	key: (x: TPokemon) => number
+) {
 	const n = arr.length;
 	if (n < 2) return 100; // perfectly sorted by default
 
