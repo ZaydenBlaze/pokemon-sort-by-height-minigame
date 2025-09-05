@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Toaster, toast } from "sonner";
 import { useSprings } from "@react-spring/web";
+import { Confetti } from "@neoconfetti/react";
 import { PokemonContainer } from "./components/ui/PokemonContainer";
 import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
@@ -158,6 +159,7 @@ function App() {
 		setPokemonIds(generateRandomPokemonIds(numOfPokemon));
 		setIsGuessSubmitted(false);
 		setAnimationDirection("toSorted");
+		setScoreForGuess(null); // if not set to null, confetti will explode on a new game after a perfect game
 	}
 
 	return (
@@ -183,7 +185,7 @@ function App() {
 							Number of pokemon:
 						</Label>
 						<Input
-							className="bg-white w-20 inline-block"
+							className="bg-white w-20 inline-block mb-2"
 							onChange={(e) => setNumOfPokemon(e.target.value)}
 							value={numOfPokemon}
 							id="numOfPokemon"
@@ -221,6 +223,7 @@ function App() {
 							? "Show sorted position"
 							: "Show original position"}
 					</Button>
+					{scoreForGuess === 100 ? <Confetti /> : null}
 					<p
 						className={`text-xl mb-4 ${
 							isGuessSubmitted ? "visible" : "invisible"
