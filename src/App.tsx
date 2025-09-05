@@ -174,38 +174,42 @@ function App() {
 				Once submitted, you can toggle between the correct answer and
 				your attempt.
 			</p>
-			<Tooltip>
-				<TooltipTrigger asChild>
-					<div className="inline-block">
-						{/* Without inline-block, Tooltip shows up on the left */}
-						<Label
-							htmlFor="numOfPokemon"
-							className="mb-2 mr-3 inline-block text-xl"
-						>
-							Number of pokemon:
-						</Label>
-						<Input
-							className="bg-white w-20 inline-block mb-2"
-							onChange={(e) => setNumOfPokemon(e.target.value)}
-							value={numOfPokemon}
-							id="numOfPokemon"
-							type="number"
-							min={2}
-							max={20}
-						></Input>
-					</div>
-				</TooltipTrigger>
-				<TooltipContent side="right">
-					<p className="text-base">Number between 2 and 20</p>
-				</TooltipContent>
-			</Tooltip>
-			<Button
-				onClick={handleNewGameButtonClick}
-				className="mb-2 cursor-pointer block text-lg"
-				size="lg"
-			>
-				New game
-			</Button>
+			<form>
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<div className="inline-block">
+							{/* Without inline-block, Tooltip shows up on the left */}
+							<Label
+								htmlFor="numOfPokemon"
+								className="mb-2 mr-3 inline-block text-xl"
+							>
+								Number of pokemon:
+							</Label>
+							<Input
+								className="bg-white w-20 inline-block mb-2"
+								onChange={(e) =>
+									setNumOfPokemon(e.target.value)
+								}
+								value={numOfPokemon}
+								id="numOfPokemon"
+								type="number"
+								min={2}
+								max={20}
+							></Input>
+						</div>
+					</TooltipTrigger>
+					<TooltipContent side="right">
+						<p className="text-base">Number between 2 and 20</p>
+					</TooltipContent>
+				</Tooltip>
+				<Button
+					onClick={handleNewGameButtonClick}
+					className="mb-2 cursor-pointer block text-lg"
+					size="lg"
+				>
+					New game
+				</Button>
+			</form>
 			{loading ? (
 				<p className="text-lg">Loading...</p>
 			) : error ? (
