@@ -3,9 +3,23 @@ import "./App.css";
 import { Button } from "@/components/ui/button";
 import { useSprings } from "@react-spring/web";
 import { PokemonContainer } from "./components/ui/PokemonContainer";
+import { gql } from "@apollo/client";
+import { useQuery } from "@apollo/client/react";
+import {
+	generatePokemonQuery,
+	generateDummyPokemonQuery,
+} from "@/utils/pokemonQueries";
+
+type TPokemon = {
+	__typename: "pokemon_v2_pokemon";
+	id: number;
+	name: string;
+	height: number;
+	weight: number;
+};
 
 function App() {
-	const [pokemonIds, setPokemonIds] = useState([6, 8, 2, 3, 4, 1, 7, 5]);
+	const [pokemonIds, setPokemonIds] = useState(generateRandomPokemonIds(10));
 	const submittedIds = useRef<number[] | null>(null);
 	const sortedIds = useMemo(() => {
 		return [...pokemonIds].sort((a, b) => a - b);
@@ -84,6 +98,35 @@ function App() {
 		});
 	}
 
+	const GET_POKEMON =
+		pokemonIds.length > 0
+			? gql`
+					${generatePokemonQuery(pokemonIds)}
+			  `
+			: gql`
+					${generateDummyPokemonQuery()}
+			  `;
+
+	const { loading, error, data } = useQuery(GET_POKEMON);
+
+	const pokemonData = data ? Object.values(data).flat() : null;
+	console.log("pokemonDtaa", pokemonData);
+	const pokemons = pokemonData?.map(({ id, name, height, weight }) => {
+		const paddedId = String(id).padStart(3, "0");
+		return (
+			<div key={id}>
+				<img
+					src={`https://assets.pokemon.com/assets/cms2/img/pokedex/full/${paddedId}.png`}
+					width={160}
+				/>
+				<h3>{capFirstLetter(name)}</h3>
+				<p>Id: {id}</p>
+				<p>Height: {height / 10} m</p>
+				<p>Weight: {weight / 10} kg</p>
+			</div>
+		);
+	});
+
 	return (
 		<div className="w-screen h-screen bg-gray-200 p-4">
 			<PokemonContainer
@@ -93,8 +136,8 @@ function App() {
 				setPokemonIds={setPokemonIds}
 				springs={springs}
 				dragDisabled={dragDisabled}
+				pokemonData={pokemonData}
 			/>
-
 			<Button
 				onClick={handleSortClick}
 				className="cursor-pointer block mt-4"
@@ -105,8 +148,31 @@ function App() {
 					? "Show sorted position"
 					: "Show original position"}
 			</Button>
+			{loading ? (
+				<p>Loading...</p>
+			) : error ? (
+				<p>Error : {error.message}</p>
+			) : (
+				<div className="flex flex-wrap gap-3">{pokemons}</div>
+			)}
 		</div>
 	);
 }
 
 export default App;
+
+function capFirstLetter(name: string) {
+	return name.charAt(0).toUpperCase() + name.slice(1);
+}
+
+function generateRandomPokemonIds(numPokemon: number) {
+	const ids: number[] = [];
+	const maxId = 1025;
+	while (ids.length < numPokemon) {
+		const randomId = Math.floor(Math.random() * maxId) + 1;
+		if (!ids.includes(randomId)) {
+			ids.push(randomId);
+		}
+	}
+	return ids;
+}

@@ -2,6 +2,13 @@ import { PokemonCard } from "@/components/ui/PokemonCard";
 import { type SpringValues } from "@react-spring/web";
 import { DragDropProvider } from "@dnd-kit/react";
 import { isSortable } from "@dnd-kit/react/sortable";
+type TPokemon = {
+	__typename: "pokemon_v2_pokemon";
+	id: number;
+	name: string;
+	height: number;
+	weight: number;
+};
 
 type PokemonContainerProps = {
 	containerRef: React.RefObject<HTMLUListElement | null>;
@@ -10,6 +17,7 @@ type PokemonContainerProps = {
 	setPokemonIds: React.Dispatch<React.SetStateAction<number[]>>;
 	springs: SpringValues<{ x: number; y: number }>[];
 	dragDisabled: boolean;
+	pokemonData: TPokemon[];
 };
 
 export const PokemonContainer = ({
@@ -19,6 +27,7 @@ export const PokemonContainer = ({
 	setPokemonIds,
 	springs,
 	dragDisabled,
+	pokemonData,
 }: PokemonContainerProps) => {
 	return (
 		<ul ref={containerRef} className="flex flex-wrap gap-3">
