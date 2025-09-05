@@ -1,6 +1,14 @@
 import { useState, useRef, useMemo } from "react";
 import "./App.css";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Toaster, toast } from "sonner";
 import { useSprings } from "@react-spring/web";
 import { PokemonContainer } from "./components/ui/PokemonContainer";
 import { gql } from "@apollo/client";
@@ -19,17 +27,22 @@ type TPokemon = {
 };
 
 function App() {
-	const [pokemonIds, setPokemonIds] = useState(generateRandomPokemonIds(10));
+	const [numOfPokemon, setNumOfPokemon] = useState(10);
+	const [pokemonIds, setPokemonIds] = useState(
+		generateRandomPokemonIds(numOfPokemon)
+	);
 	const submittedIds = useRef<number[] | null>(null);
 	const sortedIds = useRef<number[] | null>(null);
 
+	const [newGameToggle, setNewGameToggle] = useState(true);
 	const [isGuessSubmitted, setIsGuessSubmitted] = useState(false);
-
-	const containerRef = useRef<HTMLUListElement | null>(null);
-	const boxRefs = useRef<Record<number, HTMLLIElement | null>>({});
 	const [animationDirection, setAnimationDirection] = useState<
 		"toSorted" | "toUnsorted"
 	>("toSorted");
+	const [scoreForGuess, setScoreForGuess] = useState<number | null>(null);
+
+	const containerRef = useRef<HTMLUListElement | null>(null);
+	const boxRefs = useRef<Record<number, HTMLLIElement | null>>({});
 
 	// React Spring springs for FLIP animation technique
 	const [springs, api] = useSprings(pokemonIds.length, () => ({
@@ -50,13 +63,12 @@ function App() {
 	const { loading, error, data } = useQuery(GET_POKEMON);
 
 	const pokemonsData = data ? Object.values(data).flat() : null;
-	// console.log("pokemondata", pokemonsData);
 
 	function handleSortClick() {
 		if (!containerRef.current) return;
 
+		// If first button click
 		if (!isGuessSubmitted) {
-			// If first button click
 			setIsGuessSubmitted(true);
 			submittedIds.current = pokemonIds;
 
@@ -66,11 +78,23 @@ function App() {
 				pokemonsData,
 				(p) => p.height
 			);
-			console.log("Guess accuracy:", scorePercent.toFixed(1) + "%");
-
+			setScoreForGuess(scorePercent);
 			sortedIds.current = [...pokemonsData]
 				.sort((a, b) => a.height - b.height)
 				.map((pokemon) => pokemon.id);
+
+			if (scorePercent === 100) {
+				// fully sorted; no need for animation
+				return;
+			}
+		}
+
+		if (isGuessSubmitted && scoreForGuess === 100) {
+			toast("Already sorted!", {
+				style: {
+					fontSize: "1rem",
+				},
+			});
 		}
 
 		// FLIP animation technique: First-Last-Invert-Play
@@ -122,14 +146,104 @@ function App() {
 		});
 	}
 
+	function handleNewGameButtonClick(e) {
+		e.preventDefault();
+		setNewGameToggle((prevToggle) => !prevToggle);
+		if (!numOfPokemon || numOfPokemon < 2 || numOfPokemon > 20) {
+			toast.warning("Must be a number between 2 and 20", {
+				style: {
+					fontSize: "1rem",
+				},
+			});
+			return;
+		}
+	}
+
 	return (
-		<div className="w-screen h-screen bg-gray-200 p-4">
+		<div className="w-screen min-h-screen bg-orange-200 p-4">
+			{/* ^min-h-screen ensures bg color covers the entire page, even when content overflows */}
+			<Toaster position="top-center" closeButton />
+			<p className="text-xl font-bold mb-2">
+				Try sorting the pokemon by their heights, then submit your
+				guess!
+			</p>
+			<p className="text-xl font-bold mb-4">
+				Once submitted, you can toggle between the correct answer and
+				your attempt.
+			</p>
+			<Tooltip>
+				<TooltipTrigger asChild>
+					<div className="inline-block">
+						{/* Without inline-block, Tooltip shows up on the left */}
+						<Label
+							htmlFor="numOfPokemon"
+							className="mb-2 mr-3 inline-block text-xl"
+						>
+							Number of pokemon:
+						</Label>
+						<Input
+							className="bg-white w-20 inline-block"
+							onChange={(e) => setNumOfPokemon(e.target.value)}
+							value={numOfPokemon}
+							id="numOfPokemon"
+							type="number"
+							min={2}
+							max={20}
+						></Input>
+					</div>
+				</TooltipTrigger>
+				<TooltipContent side="right">
+					<p className="text-base">Number between 2 and 20</p>
+				</TooltipContent>
+			</Tooltip>
+			<Button
+				onClick={handleNewGameButtonClick}
+				className="mb-2 cursor-pointer block text-lg"
+				size="lg"
+			>
+				New game
+			</Button>
 			{loading ? (
-				<p>Loading...</p>
+				<p className="text-lg">Loading...</p>
 			) : error ? (
-				<p>Error : {error.message}</p>
+				<p className="text-lg">Error : {error.message}</p>
 			) : (
 				<>
+					<Button
+						onClick={handleSortClick}
+						className="cursor-pointer block mb-4 text-lg"
+						size="lg"
+					>
+						{!isGuessSubmitted
+							? "Submit guess"
+							: animationDirection === "toSorted"
+							? "Show sorted position"
+							: "Show original position"}
+					</Button>
+					<p
+						className={`text-xl mb-4 ${
+							isGuessSubmitted ? "visible" : "invisible"
+						}`}
+						style={{
+							background:
+								"linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet)",
+							backgroundSize: "200% 200%",
+							WebkitBackgroundClip: "text",
+							WebkitTextFillColor: "transparent",
+							animation: "rainbow 3s linear infinite",
+							WebkitTextStroke: "1px black", // adds solid black outline
+						}}
+					>
+						{`You got a score of ${scoreForGuess?.toFixed(1)}%!`}
+						<style>
+							{`
+                @keyframes rainbow {
+                  0%, 100% { background-position: 0% 50%; }
+                  50% { background-position: 100% 50%; }
+                }
+              `}
+						</style>
+					</p>
 					<PokemonContainer
 						containerRef={containerRef}
 						boxRefs={boxRefs}
@@ -139,16 +253,6 @@ function App() {
 						isGuessSubmitted={isGuessSubmitted}
 						pokemonsData={pokemonsData}
 					/>
-					<Button
-						onClick={handleSortClick}
-						className="cursor-pointer block mt-4"
-					>
-						{!isGuessSubmitted
-							? "Submit guess"
-							: animationDirection === "toSorted"
-							? "Show sorted position"
-							: "Show original position"}
-					</Button>
 				</>
 			)}
 		</div>

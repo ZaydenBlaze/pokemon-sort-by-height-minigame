@@ -41,7 +41,7 @@ export function PokemonCard({
 				ref(el);
 				refProp(el);
 			}}
-			className="w-40 bg-red-200 p-3 rounded-xl shadow-md cursor-pointer"
+			className="w-40 bg-white p-4 rounded-3xl shadow-md cursor-pointer flex flex-col"
 			style={{
 				transform: to(
 					[spring.x, spring.y],
@@ -58,20 +58,27 @@ export function PokemonCard({
 						{capFirstLetter(pokemonData.name)}
 					</p>
 					<p>Id: {id}</p>
-					<img
-						src={`https://assets.pokemon.com/assets/cms2/img/pokedex/full/${paddedId}.png`}
-						width={148}
-					/>
-					<p>
-						{isGuessSubmitted
-							? `Height: ${pokemonData.height / 10} m`
-							: `Height: ${pokemonData.height / 10} m`}
-					</p>
-					<p>
-						{isGuessSubmitted
-							? `Weight: ${pokemonData.weight / 10} kg`
-							: `Weight: ${pokemonData.weight / 10} kg`}
-					</p>
+
+					<div className="flex grow items-center justify-center">
+						{/* "grow" class means element grows to take up any remaining space in the flex container, */}
+						{/* which will exist if a pokemon on that row has a name long enough to wrap to the 2nd line. */}
+						<img
+							src={`https://assets.pokemon.com/assets/cms2/img/pokedex/full/${paddedId}.png`}
+							width={148}
+						/>
+					</div>
+					<div className="mt-auto">
+						<p>
+							{isGuessSubmitted
+								? `Height: ${pokemonData.height / 10} m`
+								: `Height: ${pokemonData.height / 10} m`}
+						</p>
+						<p className="">
+							{isGuessSubmitted
+								? `Weight: ${pokemonData.weight / 10} kg`
+								: `Weight: ${pokemonData.weight / 10} kg`}
+						</p>
+					</div>
 				</>
 			) : (
 				<p>Loading</p>
