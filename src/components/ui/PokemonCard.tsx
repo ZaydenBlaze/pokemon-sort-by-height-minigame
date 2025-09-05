@@ -68,13 +68,9 @@ export function PokemonCard({
 						<p>
 							{isGuessSubmitted
 								? `Height: ${pokemonData.height / 10} m`
-								: `Height: ${pokemonData.height / 10} m`}
+								: `Height: `}
 						</p>
-						<p className="">
-							{isGuessSubmitted
-								? `Weight: ${pokemonData.weight / 10} kg`
-								: `Weight: ${pokemonData.weight / 10} kg`}
-						</p>
+						<p>{`Weight: ${pokemonData.weight / 10} kg`}</p>
 					</div>
 				</>
 			) : (
