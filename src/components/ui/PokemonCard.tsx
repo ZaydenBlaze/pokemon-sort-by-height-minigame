@@ -15,7 +15,8 @@ type SortablePokemonProps = {
 	index: number;
 	refProp: (el: HTMLLIElement | null) => void;
 	spring: { x: SpringValue<number>; y: SpringValue<number> };
-	dragDisabled: boolean;
+	isGuessSubmitted: boolean;
+	pokemonData: TPokemon[];
 };
 
 export function PokemonCard({
@@ -23,13 +24,16 @@ export function PokemonCard({
 	index,
 	refProp,
 	spring,
-	dragDisabled,
+	isGuessSubmitted, // to know whether guess has been submitted so we know to conditionally render height and weight
+	pokemonData,
 }: SortablePokemonProps) {
 	const { ref, isDragging } = useSortable({
 		id,
 		index,
-		disabled: dragDisabled,
+		disabled: isGuessSubmitted,
 	});
+
+	const paddedId = String(id).padStart(3, "0");
 
 	return (
 		<animated.li
@@ -37,7 +41,7 @@ export function PokemonCard({
 				ref(el);
 				refProp(el);
 			}}
-			className="w-40 h-40 bg-red-200 rounded-xl shadow-md cursor-pointer flex items-center justify-center"
+			className="w-40 bg-red-200 p-3 rounded-xl shadow-md cursor-pointer"
 			style={{
 				transform: to(
 					[spring.x, spring.y],
@@ -48,7 +52,34 @@ export function PokemonCard({
 					: "",
 			}}
 		>
-			Item {id}
+			{pokemonData ? (
+				<>
+					<p className="font-bold text-lg">
+						{capFirstLetter(pokemonData.name)}
+					</p>
+					<p>Id: {id}</p>
+					<img
+						src={`https://assets.pokemon.com/assets/cms2/img/pokedex/full/${paddedId}.png`}
+						width={148}
+					/>
+					<p>
+						{isGuessSubmitted
+							? `Height: ${pokemonData.height / 10} m`
+							: "Height:"}
+					</p>
+					<p>
+						{isGuessSubmitted
+							? `Weight: ${pokemonData.weight / 10} kg`
+							: "Weight:"}
+					</p>
+				</>
+			) : (
+				<p>Loading</p>
+			)}
 		</animated.li>
 	);
+}
+
+function capFirstLetter(name: string) {
+	return name.charAt(0).toUpperCase() + name.slice(1);
 }

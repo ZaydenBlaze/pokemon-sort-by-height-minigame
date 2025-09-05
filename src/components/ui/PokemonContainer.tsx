@@ -16,8 +16,8 @@ type PokemonContainerProps = {
 	pokemonIds: number[];
 	setPokemonIds: React.Dispatch<React.SetStateAction<number[]>>;
 	springs: SpringValues<{ x: number; y: number }>[];
-	dragDisabled: boolean;
-	pokemonData: TPokemon[];
+	isGuessSubmitted: boolean;
+	pokemonsData: TPokemon[];
 };
 
 export const PokemonContainer = ({
@@ -26,8 +26,8 @@ export const PokemonContainer = ({
 	pokemonIds,
 	setPokemonIds,
 	springs,
-	dragDisabled,
-	pokemonData,
+	isGuessSubmitted,
+	pokemonsData,
 }: PokemonContainerProps) => {
 	return (
 		<ul ref={containerRef} className="flex flex-wrap gap-3">
@@ -56,7 +56,8 @@ export const PokemonContainer = ({
 							boxRefs.current[id] = el;
 						}}
 						spring={springs[index]}
-						dragDisabled={dragDisabled}
+						isGuessSubmitted={isGuessSubmitted}
+						pokemonData={pokemonsData[index]}
 					/>
 				))}
 			</DragDropProvider>

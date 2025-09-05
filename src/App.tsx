@@ -21,11 +21,13 @@ type TPokemon = {
 function App() {
 	const [pokemonIds, setPokemonIds] = useState(generateRandomPokemonIds(10));
 	const submittedIds = useRef<number[] | null>(null);
-	const sortedIds = useMemo(() => {
-		return [...pokemonIds].sort((a, b) => a - b);
-	}, [pokemonIds]);
+	const sortedIds = useRef<number[] | null>(null);
 
-	const [dragDisabled, setDragDisabled] = useState(false);
+	// const sortedIds = useMemo(() => {
+	// 	return [...pokemonIds].sort((a, b) => a - b);
+	// }, [pokemonIds]);
+
+	const [isGuessSubmitted, setIsGuessSubmitted] = useState(false);
 
 	const containerRef = useRef<HTMLUListElement | null>(null);
 	const boxRefs = useRef<Record<number, HTMLLIElement | null>>({});
@@ -40,13 +42,31 @@ function App() {
 		config: { mass: 1, tension: 150, friction: 25 },
 	}));
 
+	const GET_POKEMON =
+		pokemonIds.length > 0
+			? gql`
+					${generatePokemonQuery(pokemonIds)}
+			  `
+			: gql`
+					${generateDummyPokemonQuery()}
+			  `;
+
+	const { loading, error, data } = useQuery(GET_POKEMON);
+
+	const pokemonsData = data ? Object.values(data).flat() : null;
+	console.log("pokemondata", pokemonsData);
+
 	function handleSortClick() {
 		if (!containerRef.current) return;
 
-		if (!dragDisabled) {
-			// If submitting guess (first button click)
-			setDragDisabled(true);
+		if (!isGuessSubmitted) {
+			setIsGuessSubmitted(true);
 			submittedIds.current = pokemonIds;
+			if (!pokemonsData) return;
+			sortedIds.current = [...pokemonsData]
+				.sort((a, b) => a.height - b.height)
+				.map((pokemon) => pokemon.id);
+			console.log("sortedids currernt", sortedIds.current);
 		}
 
 		// FLIP animation technique: First-Last-Invert-Play
@@ -60,8 +80,8 @@ function App() {
 		// Last: update order
 		const newOrder =
 			animationDirection === "toSorted"
-				? sortedIds
-				: submittedIds.current ?? []; // if ternary chooses submittedIds.current, and submittedIds.current is null, then choose []
+				? sortedIds.current ?? [] // if ternary chooses sortedIds.current, and sortedIds.current is null, then choose []
+				: submittedIds.current ?? [];
 		setPokemonIds(newOrder);
 
 		setAnimationDirection((prevAnimationDirection) =>
@@ -98,72 +118,40 @@ function App() {
 		});
 	}
 
-	const GET_POKEMON =
-		pokemonIds.length > 0
-			? gql`
-					${generatePokemonQuery(pokemonIds)}
-			  `
-			: gql`
-					${generateDummyPokemonQuery()}
-			  `;
-
-	const { loading, error, data } = useQuery(GET_POKEMON);
-
-	const pokemonData = data ? Object.values(data).flat() : null;
-	console.log("pokemonDtaa", pokemonData);
-	const pokemons = pokemonData?.map(({ id, name, height, weight }) => {
-		const paddedId = String(id).padStart(3, "0");
-		return (
-			<div key={id}>
-				<img
-					src={`https://assets.pokemon.com/assets/cms2/img/pokedex/full/${paddedId}.png`}
-					width={160}
-				/>
-				<h3>{capFirstLetter(name)}</h3>
-				<p>Id: {id}</p>
-				<p>Height: {height / 10} m</p>
-				<p>Weight: {weight / 10} kg</p>
-			</div>
-		);
-	});
-
 	return (
 		<div className="w-screen h-screen bg-gray-200 p-4">
-			<PokemonContainer
-				containerRef={containerRef}
-				boxRefs={boxRefs}
-				pokemonIds={pokemonIds}
-				setPokemonIds={setPokemonIds}
-				springs={springs}
-				dragDisabled={dragDisabled}
-				pokemonData={pokemonData}
-			/>
-			<Button
-				onClick={handleSortClick}
-				className="cursor-pointer block mt-4"
-			>
-				{!dragDisabled
-					? "Submit guess"
-					: animationDirection === "toSorted"
-					? "Show sorted position"
-					: "Show original position"}
-			</Button>
 			{loading ? (
 				<p>Loading...</p>
 			) : error ? (
 				<p>Error : {error.message}</p>
 			) : (
-				<div className="flex flex-wrap gap-3">{pokemons}</div>
+				<>
+					<PokemonContainer
+						containerRef={containerRef}
+						boxRefs={boxRefs}
+						pokemonIds={pokemonIds}
+						setPokemonIds={setPokemonIds}
+						springs={springs}
+						isGuessSubmitted={isGuessSubmitted}
+						pokemonsData={pokemonsData}
+					/>
+					<Button
+						onClick={handleSortClick}
+						className="cursor-pointer block mt-4"
+					>
+						{!isGuessSubmitted
+							? "Submit guess"
+							: animationDirection === "toSorted"
+							? "Show sorted position"
+							: "Show original position"}
+					</Button>
+				</>
 			)}
 		</div>
 	);
 }
 
 export default App;
-
-function capFirstLetter(name: string) {
-	return name.charAt(0).toUpperCase() + name.slice(1);
-}
 
 function generateRandomPokemonIds(numPokemon: number) {
 	const ids: number[] = [];
