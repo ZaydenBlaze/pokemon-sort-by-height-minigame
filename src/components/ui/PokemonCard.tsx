@@ -65,12 +65,12 @@ export function PokemonCard({
 					<p>
 						{isGuessSubmitted
 							? `Height: ${pokemonData.height / 10} m`
-							: "Height:"}
+							: `Height: ${pokemonData.height / 10} m`}
 					</p>
 					<p>
 						{isGuessSubmitted
 							? `Weight: ${pokemonData.weight / 10} kg`
-							: "Weight:"}
+							: `Weight: ${pokemonData.weight / 10} kg`}
 					</p>
 				</>
 			) : (

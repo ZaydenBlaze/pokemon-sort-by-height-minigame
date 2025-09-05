@@ -23,10 +23,6 @@ function App() {
 	const submittedIds = useRef<number[] | null>(null);
 	const sortedIds = useRef<number[] | null>(null);
 
-	// const sortedIds = useMemo(() => {
-	// 	return [...pokemonIds].sort((a, b) => a - b);
-	// }, [pokemonIds]);
-
 	const [isGuessSubmitted, setIsGuessSubmitted] = useState(false);
 
 	const containerRef = useRef<HTMLUListElement | null>(null);
@@ -54,19 +50,27 @@ function App() {
 	const { loading, error, data } = useQuery(GET_POKEMON);
 
 	const pokemonsData = data ? Object.values(data).flat() : null;
-	console.log("pokemondata", pokemonsData);
+	// console.log("pokemondata", pokemonsData);
 
 	function handleSortClick() {
 		if (!containerRef.current) return;
 
 		if (!isGuessSubmitted) {
+			// If first button click
 			setIsGuessSubmitted(true);
 			submittedIds.current = pokemonIds;
+
+			// Count inversions to quantify disorder
 			if (!pokemonsData) return;
+			const scorePercent = countInversionsPercentage(
+				pokemonsData,
+				(p) => p.height
+			);
+			console.log("Guess accuracy:", scorePercent.toFixed(1) + "%");
+
 			sortedIds.current = [...pokemonsData]
 				.sort((a, b) => a.height - b.height)
 				.map((pokemon) => pokemon.id);
-			console.log("sortedids currernt", sortedIds.current);
 		}
 
 		// FLIP animation technique: First-Last-Invert-Play
@@ -163,4 +167,22 @@ function generateRandomPokemonIds(numPokemon: number) {
 		}
 	}
 	return ids;
+}
+
+// Kendall's tau distance
+function countInversionsPercentage(arr, key = (x) => x) {
+	const n = arr.length;
+	if (n < 2) return 100; // perfectly sorted by default
+
+	let inversions = 0;
+	for (let i = 0; i < n; i++) {
+		for (let j = i + 1; j < n; j++) {
+			if (key(arr[i]) > key(arr[j])) inversions++;
+		}
+	}
+
+	const maxInversions = (n * (n - 1)) / 2;
+	const normalized = inversions / maxInversions;
+
+	return (1 - normalized) * 100; // 100% = perfect, 0% = worst
 }
