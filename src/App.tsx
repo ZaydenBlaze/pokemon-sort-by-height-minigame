@@ -34,7 +34,6 @@ function App() {
 	const submittedIds = useRef<number[] | null>(null);
 	const sortedIds = useRef<number[] | null>(null);
 
-	const [newGameToggle, setNewGameToggle] = useState(true);
 	const [isGuessSubmitted, setIsGuessSubmitted] = useState(false);
 	const [animationDirection, setAnimationDirection] = useState<
 		"toSorted" | "toUnsorted"
@@ -148,7 +147,6 @@ function App() {
 
 	function handleNewGameButtonClick(e) {
 		e.preventDefault();
-		setNewGameToggle((prevToggle) => !prevToggle);
 		if (!numOfPokemon || numOfPokemon < 2 || numOfPokemon > 20) {
 			toast.warning("Must be a number between 2 and 20", {
 				style: {
@@ -157,6 +155,9 @@ function App() {
 			});
 			return;
 		}
+		setPokemonIds(generateRandomPokemonIds(numOfPokemon));
+		setIsGuessSubmitted(false);
+		setAnimationDirection("toSorted");
 	}
 
 	return (
