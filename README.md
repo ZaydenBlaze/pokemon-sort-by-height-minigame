@@ -1,6 +1,6 @@
 ### **Live demo at:** https://pokemon-sort-by-height-minigame.onrender.com/
 
-A minigame for guessing order of pokemon heights.
+A Pokemon height-ordering minigame built with React and TypeScript, using Tailwind CSS and Shadcn for styling.
 
 - Implemented data fetching for Pokémon from a GraphQL API for each new game
 - Implemented animation using React Spring to transition between the user’s guessed order and the correct order, with springs that are responsive to layout changes
