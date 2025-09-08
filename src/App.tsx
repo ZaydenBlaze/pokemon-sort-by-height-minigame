@@ -9,6 +9,7 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Toaster, toast } from "sonner";
+import { HiOutlineQuestionMarkCircle } from "react-icons/hi2";
 import { useSprings } from "@react-spring/web";
 import { Confetti } from "@neoconfetti/react";
 import { PokemonContainer } from "@/components/ui/PokemonContainer";
@@ -19,7 +20,7 @@ import {
 	generateDummyPokemonQuery,
 } from "@/utils/pokemonQueries";
 import { generateRandomPokemonIds } from "@/utils/generateRandomPokemonIds";
-import { countInversionsPercentage } from "@/utils/countInversionsPercentage";
+import { getSortedIdsAndScore } from "./utils/getSortedIdsAndScore";
 import { type TPokemon } from "@/types/TPokemon";
 
 function App() {
@@ -71,16 +72,14 @@ function App() {
 
 			// Count inversions to quantify disorder and get score for submitted guess
 			if (!pokemonsData) return;
-			const scorePercent = countInversionsPercentage(
-				pokemonsData,
-				(p) => p.height
-			);
-			setScoreForGuess(scorePercent);
-			sortedIds.current = [...pokemonsData]
-				.sort((a, b) => a.height - b.height)
-				.map((pokemon) => pokemon.id);
 
-			if (scorePercent === 100) {
+			const { listOfSortedIds, sortednessPercentage } =
+				getSortedIdsAndScore(pokemonsData)!;
+			setScoreForGuess(sortednessPercentage);
+
+			sortedIds.current = listOfSortedIds;
+
+			if (sortednessPercentage === 100) {
 				// Fully sorted; no need for animation
 				return;
 			}
@@ -162,12 +161,12 @@ function App() {
 	}
 
 	return (
-		<div className="w-screen min-h-screen bg-orange-200 p-4">
+		<div className="w-full min-h-screen bg-orange-200 p-4">
 			{/* ^ min-h-screen ensures bg color covers the entire page, even when content overflows */}
 			<Toaster position="top-center" closeButton />
 			<p className="font-bold">
-				Try sorting the pokemon by their heights, then submit your
-				guess!
+				Try sorting the pokemon by their heights in ascending order,
+				then submit your guess!
 			</p>
 			<p className="font-bold mb-2">
 				Once submitted, you can toggle between the correct answer and
@@ -237,30 +236,51 @@ function App() {
 							<Confetti />
 						</div>
 					) : null}
-					<p
-						className={`text-xl mb-2 ${
-							isGuessSubmitted ? "visible" : "invisible"
-						}`}
-						style={{
-							background:
-								"linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet)",
-							backgroundSize: "200% 200%",
-							WebkitBackgroundClip: "text",
-							WebkitTextFillColor: "transparent",
-							animation: "rainbow 3s linear infinite",
-							WebkitTextStroke: "1px black",
-						}}
-					>
-						{`You got a score of ${scoreForGuess?.toFixed(1)}%!`}
-						<style>
-							{`
-                @keyframes rainbow {
-                  0%, 100% { background-position: 0% 50%; }
-                  50% { background-position: 100% 50%; }
-                }
-              `}
-						</style>
-					</p>
+					<div className="flex items-center mb-2 text-xl">
+						<p
+							className={`${
+								isGuessSubmitted ? "visible" : "invisible"
+							}`}
+							style={{
+								background:
+									"linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet)",
+								backgroundSize: "200% 200%",
+								WebkitBackgroundClip: "text",
+								WebkitTextFillColor: "transparent",
+								animation: "rainbow 3s linear infinite",
+								WebkitTextStroke: "1px black",
+							}}
+						>
+							{`You got a score of ${scoreForGuess?.toFixed(
+								1
+							)}%!`}
+							<style>
+								{`
+                  @keyframes rainbow {
+                    0%, 100% { background-position: 0% 50%; }
+                    50% { background-position: 100% 50%; }
+                  }
+                `}
+							</style>
+						</p>
+						<Tooltip>
+							<TooltipTrigger className="ml-2">
+								<HiOutlineQuestionMarkCircle
+									className={`align-center ${
+										isGuessSubmitted
+											? "visible"
+											: "invisible"
+									}`}
+								/>
+							</TooltipTrigger>
+							<TooltipContent side="bottom">
+								<p>
+									score = 100 x [1 - (sum of distances / max
+									possible sum of distances)]
+								</p>
+							</TooltipContent>
+						</Tooltip>
+					</div>
 					<PokemonContainer
 						containerRef={containerRef}
 						boxRefs={boxRefs}
